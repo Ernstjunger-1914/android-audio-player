@@ -1,6 +1,6 @@
 package com.vot.audioplayer.media.constants
 
-object sample {
+object S {
     const val PLAYBACK_NOTIFICATION_CHANNEL_ID: String = "asdf"
     const val PLAYBACK_NOTIFICATION_ID: Long = 12677623536
     const val MEDIA_ROOT_ID: String = "ssd"
