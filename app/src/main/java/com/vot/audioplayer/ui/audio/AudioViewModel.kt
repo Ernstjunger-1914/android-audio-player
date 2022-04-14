@@ -8,9 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vot.audioplayer.data.model.Audio
 import com.vot.audioplayer.data.repository.AudioRepository
+import com.vot.audioplayer.media.constants.S
 import com.vot.audioplayer.media.exoplayer.MediaPlayerServiceConnection
+import com.vot.audioplayer.media.exoplayer.currentPosition
 import com.vot.audioplayer.media.exoplayer.isPlaying
 import com.vot.audioplayer.media.service.MediaPlayerService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,6 +49,92 @@ class AudioViewModel @Inject constructor(
     var currentAudioProgress = mutableStateOf(0f)
 
     init {
+        viewModelScope.launch {
+            audioList += getAndFormatAudioData()
+            isConnected.collect {
+                if (it) {
+                    rootMediaId = serviceConnection.rootMediaId
+                    serviceConnection.plaBackState.value?.apply {
+                        currentPlayBackPosition = position
+                    }
+                    serviceConnection.subscribe(rootMediaId, subscriptionCallback)
+                }
+            }
+        }
+    }
+
+    private suspend fun getAndFormatAudioData(): List<Audio> {
+        return repository.getAudioData().map {
+            val displayName = it.displayName.substringBefore(".")
+            val artist = if (it.artist.contains("<unknown>")) "Unknown Artist" else it.artist
+
+            it.copy(
+                displayName = displayName,
+                artist = artist
+            )
+        }
+    }
+
+    fun playAudio(currentAudio: Audio) {
+        serviceConnection.playAudio(audioList)
+        if (currentAudio.id == currentPlayingAudio.value?.id) {
+            if (isAudioPlaying) {
+                serviceConnection.transportControl.pause()
+            } else {
+                serviceConnection.transportControl.play()
+            }
+        } else {
+            serviceConnection.transportControl.playFromMediaId(
+                currentAudio.id.toString(),
+                null
+            )
+        }
+    }
+
+    fun stopPlayBack() {
+        serviceConnection.transportControl.stop()
+    }
+
+    fun fastForward() {
+        serviceConnection.fastForward()
+    }
+
+    fun rewind() {
+        serviceConnection.rewind()
+    }
+
+    fun skipToNext() {
+        serviceConnection.skipToNext()
+    }
+
+    fun seekTo(value: Float) {
+        serviceConnection.transportControl.seekTo(
+            (currentDuration * value / 100f).toLong()
+        )
+    }
+
+    private fun updatePlayBack() {
+        viewModelScope.launch {
+            val position = playbackState.value?.currentPosition ?: 0
+
+            if (currentPlayBackPosition != position) currentPlayBackPosition = position
+            if (currentDuration > 0) {
+                currentAudioProgress.value = (
+                        currentPlayBackPosition.toFloat() / currentDuration.toFloat() * 100f
+                        )
+            }
+            delay(S.PLAYBACK_UPDATE_INTERVAL)
+            if (updatePosition) updatePlayBack()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        serviceConnection.unSubscribe(
+            S.MEDIA_ROOT_ID,
+            object : MediaBrowserCompat.SubscriptionCallback() {}
+        )
+        updatePosition = false
     }
 
 }

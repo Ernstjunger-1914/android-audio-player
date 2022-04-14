@@ -60,8 +60,21 @@ class MediaPlayerServiceConnection @Inject constructor(
         }
     }
 
+    fun rewind(seconds: Int = 10) {
+        plaBackState.value?.currentPosition?.let {
+            transportControl.seekTo(it - seconds * 1000)
+        }
+    }
+
     fun skipToNext() {
         transportControl.skipToNext()
+    }
+
+    fun subscribe(
+        parentId: String,
+        callBack: MediaBrowserCompat.SubscriptionCallback
+    ) {
+        mediaBrowser.subscribe(parentId, callBack)
     }
 
     fun unSubscribe(
