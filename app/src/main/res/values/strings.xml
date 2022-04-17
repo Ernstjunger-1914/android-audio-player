@@ -6,8 +6,8 @@
     <string name="notification_channel_description">현재 앱에서 재생 중인 음악 표시</string>
 
     <!-- 동작 알림 -->
-    <string name="notification_skip_to_previous">Skip to previous track</string>
-    <string name="notification_skip_to_next">Skip to next track</string>
+    <string name="notification_skip_to_previous">이전으로</string>
+    <string name="notification_skip_to_next">다음으로</string>
     <string name="notification_play">듣기</string>
     <string name="notification_pause">일시정지</string>
 
