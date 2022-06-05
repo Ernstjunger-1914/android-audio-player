@@ -13,11 +13,13 @@ import com.vot.audioplayer.media.exoplayer.MediaPlayerServiceConnection
 import com.vot.audioplayer.media.exoplayer.currentPosition
 import com.vot.audioplayer.media.exoplayer.isPlaying
 import com.vot.audioplayer.media.service.MediaPlayerService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class AudioViewModel @Inject constructor(
     private val repository: AudioRepository,
     serviceConnection: MediaPlayerServiceConnection
@@ -43,9 +45,11 @@ class AudioViewModel @Inject constructor(
     }
 
     private val serviceConnection = serviceConnection.also {
+        updatePlayBack()
     }
 
-    val currentDuration = MediaPlayerService.currentDuration
+    val currentDuration: Long
+        get() = MediaPlayerService.currentDuration
     var currentAudioProgress = mutableStateOf(0f)
 
     init {
