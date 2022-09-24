@@ -10,7 +10,10 @@ import com.vot.audioplayer.data.model.Audio
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class ContentResolverHelper @Inject constructor(@ApplicationContext val context: Context) {
+class ContentResolverHelper @Inject constructor(
+    @ApplicationContext val context: Context
+) {
+
     private var mCursor: Cursor? = null
 
     private val projection: Array<String> = arrayOf(
@@ -44,7 +47,8 @@ class ContentResolverHelper @Inject constructor(@ApplicationContext val context:
 
         mCursor?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns._ID)
-            val displayNameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
+            val displayNameCol =
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
             val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)
             val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA)
             val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION)
@@ -75,4 +79,5 @@ class ContentResolverHelper @Inject constructor(@ApplicationContext val context:
         }
         return audioList
     }
+
 }
